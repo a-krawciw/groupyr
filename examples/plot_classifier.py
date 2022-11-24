@@ -33,6 +33,8 @@ model = LogisticSGLCV(
     groups=groups, l1_ratio=[0.80, 0.90], n_alphas=40, tol=1e-3, eps=1e-2, cv=3
 ).fit(X, y)
 
+print(model.score(X, y))
+
 plt.plot(
     np.arange(n_features),
     model.coef_,
