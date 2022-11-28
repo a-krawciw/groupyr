@@ -355,7 +355,7 @@ class ScaledLogLoss(cp.utils.LogLoss):
         if not return_gradient:
             return loss
 
-        z0_b = self.expit_b(z, self.b) + (self.scale - 1)*self.b*self.logsig(z)
+        z0_b = self.expit_b(z, self.scale*self.b) + (self.scale - 1)*self.b*self._sigma(z, z>0)
 
         grad = cp.utils.safe_sparse_add(self.A.T.dot(z0_b) / self.A.shape[0], self.alpha * x_)
         grad = np.asarray(grad).ravel()
