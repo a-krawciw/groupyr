@@ -226,20 +226,20 @@ class LogisticSGL(SGLBaseEstimator, LinearClassifierMixin):
 
 
 def logistic_sgl_path(
-    X,
-    y,
-    l1_ratio=0.5,
-    groups=None,
-    scale_l2_by="group_length",
-    eps=1e-3,
-    n_alphas=100,
-    alphas=None,
-    Xy=None,
-    normalize=False,
-    copy_X=True,
-    verbose=False,
-    check_input=True,
-    **params,
+        X,
+        y,
+        l1_ratio=0.5,
+        groups=None,
+        scale_l2_by="group_length",
+        eps=1e-3,
+        n_alphas=100,
+        alphas=None,
+        Xy=None,
+        normalize=False,
+        copy_X=True,
+        verbose=False,
+        check_input=True,
+        **params,
 ):
     """Compute a Logistic SGL model for a list of regularization parameters.
 
@@ -433,23 +433,23 @@ def logistic_sgl_path(
 
 # helper function for LogisticSGLCV
 def logistic_sgl_scoring_path(
-    X,
-    y,
-    train,
-    test,
-    l1_ratio=0.5,
-    groups=None,
-    scale_l2_by="group_length",
-    eps=1e-3,
-    n_alphas=100,
-    alphas=None,
-    Xy=None,
-    normalize=False,
-    copy_X=True,
-    verbose=False,
-    check_input=True,
-    scoring=None,
-    **params,
+        X,
+        y,
+        train,
+        test,
+        l1_ratio=0.5,
+        groups=None,
+        scale_l2_by="group_length",
+        eps=1e-3,
+        n_alphas=100,
+        alphas=None,
+        Xy=None,
+        normalize=False,
+        copy_X=True,
+        verbose=False,
+        check_input=True,
+        scoring=None,
+        **params,
 ):
     """Compute scores across logistic SGL path.
 
@@ -800,27 +800,27 @@ class LogisticSGLCV(LogisticSGL):
     """
 
     def __init__(
-        self,
-        l1_ratio=1.0,
-        groups=None,
-        scale_l2_by="group_length",
-        eps=1e-3,
-        n_alphas=100,
-        alphas=None,
-        fit_intercept=True,
-        normalize=False,
-        max_iter=1000,
-        tol=1e-7,
-        scoring=None,
-        cv=None,
-        copy_X=True,
-        verbose=False,
-        n_jobs=None,
-        tuning_strategy="grid",
-        n_bayes_iter=50,
-        n_bayes_points=1,
-        random_state=None,
-        suppress_solver_warnings=True,
+            self,
+            l1_ratio=1.0,
+            groups=None,
+            scale_l2_by="group_length",
+            eps=1e-3,
+            n_alphas=100,
+            alphas=None,
+            fit_intercept=True,
+            normalize=False,
+            max_iter=1000,
+            tol=1e-7,
+            scoring=None,
+            cv=None,
+            copy_X=True,
+            verbose=False,
+            n_jobs=None,
+            tuning_strategy="grid",
+            n_bayes_iter=50,
+            n_bayes_points=1,
+            random_state=None,
+            suppress_solver_warnings=True,
     ):
         self.l1_ratio = l1_ratio
         self.groups = groups
@@ -891,7 +891,7 @@ class LogisticSGLCV(LogisticSGL):
             )
             if sparse.isspmatrix(X):
                 if hasattr(reference_to_old_X, "data") and not np.may_share_memory(
-                    reference_to_old_X.data, X.data
+                        reference_to_old_X.data, X.data
                 ):
                     # X is a sparse matrix and has been copied
                     copy_X = False
@@ -1215,3 +1215,13 @@ class LogisticSGLCV(LogisticSGL):
 
     def _more_tags(self):  # pylint: disable=no-self-use
         return {"binary_only": True, "requires_y": True}
+
+
+class WeightedLogisticSGL(LogisticSGL):
+
+    def __init__(self, scale=1.0, **kwargs):
+        super(WeightedLogisticSGL, self).__init__(**kwargs)
+        self.scale = scale
+
+    def fit(self, X, y):
+        return SGLBaseEstimator.fit(self, X, y, loss=f"scaled_log_{self.scale}")

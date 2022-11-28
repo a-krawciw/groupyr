@@ -214,6 +214,9 @@ class SGLBaseEstimator(BaseEstimator, TransformerMixin):
             f = cp.utils.HuberLoss(X, y)
         elif loss == "log":
             f = cp.utils.LogLoss(X, y)
+        elif "scaled_log" in loss:
+            s = float(loss.split("_")[2])
+            f = ScaledLogLoss(X, y, scale=s)
         else:
             f = cp.utils.SquareLoss(X, y)
 
@@ -332,3 +335,32 @@ class SGLBaseEstimator(BaseEstimator, TransformerMixin):
 
     def _more_tags(self):  # pylint: disable=no-self-use
         return {"requires_y": True}
+
+class ScaledLogLoss(cp.utils.LogLoss):
+
+    def __init__(self, A, b, scale=1.0, alpha=0.0):
+        super(ScaledLogLoss, self).__init__(A, b, alpha=alpha)
+        self.scale = scale
+
+    def f_grad(self, x, return_gradient=True):
+        if self.intercept:
+            x_, c = x[:-1], x[-1]
+        else:
+            x_, c = x, 0.0
+        z = cp.utils.safe_sparse_dot(self.A, x_, dense_output=True).ravel() + c
+        loss = np.mean((1 - self.b) * z - (1 + (self.scale-1)*self.b)*self.logsig(z))
+        penalty = cp.utils.safe_sparse_dot(x_.T, x_, dense_output=True).ravel()[0]
+        loss += 0.5 * self.alpha * penalty
+
+        if not return_gradient:
+            return loss
+
+        z0_b = self.expit_b(z, self.b) + (self.scale - 1)*self.b*self.logsig(z)
+
+        grad = cp.utils.safe_sparse_add(self.A.T.dot(z0_b) / self.A.shape[0], self.alpha * x_)
+        grad = np.asarray(grad).ravel()
+        grad_c = z0_b.mean()
+        if self.intercept:
+            return np.concatenate((grad, [grad_c]))
+
+        return loss, grad
