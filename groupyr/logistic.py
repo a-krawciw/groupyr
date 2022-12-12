@@ -1219,9 +1219,22 @@ class LogisticSGLCV(LogisticSGL):
 
 class WeightedLogisticSGL(LogisticSGL):
 
-    def __init__(self, scale=1.0, **kwargs):
-        super(WeightedLogisticSGL, self).__init__(**kwargs)
+    def __init__(self, auto_scale=True, scale=1.0, stretching=1.0, alpha=0.0, **kwargs):
+        super(WeightedLogisticSGL, self).__init__(alpha=alpha, **kwargs)
+        self.stretching = stretching
         self.scale = scale
+        self.auto_scale = auto_scale
+
+    def get_params(self, deep=True):
+        params = super().get_params(deep)
+        params['stretching'] = self.stretching
+        params['auto_scale'] = self.auto_scale
+        return params
+
 
     def fit(self, X, y):
+        if self.auto_scale:
+            self.scale = (0.33333/np.mean(y))**self.stretching
+        if np.max(y) > 1:
+            print("Not a binary classification this is undefined.")
         return SGLBaseEstimator.fit(self, X, y, loss=f"scaled_log_{self.scale}")

@@ -37,7 +37,7 @@ X, y, groups, coef = gpr.datasets.make_group_regression(
 )
 
 path_coefs, path_alphas, path_iters = gpr.sgl_path(
-    X, y, l1_ratio=0.5, groups=groups, eps=0.001, n_alphas=200, max_ier=1000, tol=1e-3
+    X, y, l1_ratio=0, groups=groups, eps=0.001, n_alphas=200, max_ier=1000, tol=1e-3
 )
 
 group_means = np.array([np.linalg.norm(path_coefs[grp], axis=0) for grp in groups])
@@ -67,3 +67,4 @@ _ = ax[1].set_ylabel(
 )
 
 _ = ax[0].set_title(r"SGL ($\lambda=0.5$) regularization path", fontsize=16)
+plt.show()
